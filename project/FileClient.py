@@ -30,9 +30,31 @@ while True:
     if command_parts[0] == 'bye':
         break
 
-    # Receive and print the response from the server
-    response = receive_response(client_socket)
-    print("Response from server:", response)
+    if command_parts[0] == 'put':
+        try:
+            with open(command_parts[1], 'rb') as file:
+                data = file.read()
+            client_socket.sendall(data)
+            print(f"File {command_parts[1]} sent successfully.")
+        except Exception as e:
+            print(f"Error sending file: {e}")
+    # Special handling for 'get' command
+    if command_parts[0] == 'get':
+        try:
+            data = client_socket.recv(4096)
+            if data.decode(errors='ignore').startswith('File Not Found'):
+                print("File Not Found")
+            else:
+                with open(command_parts[1], 'wb') as file:
+                    file.write(data)
+                    print("Initial chunk written, size: {} bytes".format(len(data)))
+                print(f"File {command_parts[1]} received successfully.")
+        except Exception as e:
+            print(f"Error receiving file: {e}")
+    else:
+        # Receive and print the response from the server for other commands
+        response = receive_response(client_socket)
+        print("Response from server:", response)
 
 # Close connection if 'break'
 client_socket.close()

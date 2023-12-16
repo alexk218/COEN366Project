@@ -4,21 +4,7 @@
 import os  # for getsize() function
 from socket import *
 
-'''
 # Formats a request to be sent to server based on the given command & filenames
-def format_request(command, filename=None, new_filename=None):
-    binary_command = string_to_binary(command)
-    print("Command in binary:", binary_command)
-    request = binary_command
-    if filename:
-        binary_filename = string_to_binary(filename)
-        request += f" {binary_filename}"  # append filename to the request.
-    if new_filename:  # if new filename provided -> rename
-        binary_new_filename = string_to_binary(new_filename)
-        request += f" {binary_new_filename}"  # append new filename to the request.
-    return request  # return the formatted request
-'''
-
 def format_request(command, filename=None, new_filename=None):
     opcode = {
         "put": "000",

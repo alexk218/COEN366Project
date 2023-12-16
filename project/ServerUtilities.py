@@ -36,8 +36,10 @@ def handle_request(parsed_request, connection_socket):
 
     elif command == 'get':
         if filenames and os.path.exists(filenames[0]):
+            print(f"File {filenames[0]} found, preparing to send.")  # Debugging print
             send_file(connection_socket, filenames[0])
         else:
+            print(f"File {filenames[0]} not found.")  # Debugging print
             send_response(connection_socket, "File not found.")
 
     elif command == 'summary':
@@ -48,11 +50,14 @@ def handle_request(parsed_request, connection_socket):
         send_response(connection_socket, summary)
 
     elif command == 'change':
-        if len(filenames) == 2 and os.path.exists(filenames[0]):
-            rename_file(filenames[0], filenames[1])
-            send_response(connection_socket, "File renamed successfully.")
+        if len(filenames) == 2:
+            success = rename_file(filenames[0], filenames[1])
+            if success:
+                send_response(connection_socket, "File renamed successfully.")
+            else:
+                send_response(connection_socket, "Rename failed. File not found or new filename not provided.")
         else:
-            send_response(connection_socket, "Rename failed. File not found or new filename not provided.")
+            send_response(connection_socket, "Invalid command format for change.")
 
     elif command == 'help':
         handle_help(connection_socket)
@@ -72,22 +77,43 @@ def send_response(connection_socket, response):
 
 # Function to receive a file from the client and save it
 def receive_file(connection_socket, filename):
-    with open(filename, 'wb') as file:
-        while True:
-            data = connection_socket.recv(1024)
-            if not data:
-                break
-            file.write(data)
+    try:
+        print("Receiving file from client and saving")
+        data = connection_socket.recv(4096)  # Receive up to 4096 bytes
+        if data:
+            with open(filename, 'wb') as file:  # Open in write-binary mode
+                file.write(data)
+            print(f"File {filename} received and saved successfully.")
+        else:
+            print(f"No data received for file {filename}.")
+    except Exception as e:
+        print(f"Error receiving file: {e}")
+
+
 
 # Function to send a file to the client
 def send_file(connection_socket, filename):
-    with open(filename, 'rb') as file:
-        data = file.read()
-    connection_socket.sendall(data)
+    print("sending file to client")
+    try:
+        fileExists = os.path.exists(filename)
+        if fileExists:
+            with open(filename, 'rb') as file:
+                data = file.read()  # Read the entire file
+            filedl = connection_socket.send(data)  # Send the entire file data
+            print(f"File {filename} sent to client, size: {len(data)} bytes")
+        else:
+            print(f"File {filename} not found.")
+            msg = "File Not Found"
+            connection_socket.send(msg.encode())
+    except Exception as e:
+        print(f"Error sending file: {e}")
 
 # Function to rename a file on the server
 def rename_file(old_filename, new_filename):
-    os.rename(old_filename, new_filename)
+    if os.path.exists(old_filename):
+        os.rename(old_filename, new_filename)
+        return True
+    return False
 
 # Function to handle 'help' command
 def handle_help(connection_socket):

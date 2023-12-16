@@ -25,7 +25,6 @@ while True:
     while keep_alive:
         # process the client's request
         client_request = connection_socket.recv(1024).decode()
-        print("Received from client:", client_request)
         if not client_request:
             break  # break the loop if no request is received
 
