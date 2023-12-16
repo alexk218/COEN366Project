@@ -108,12 +108,25 @@ def send_file(connection_socket, filename):
     except Exception as e:
         print(f"Error sending file: {e}")
 
-# Function to rename a file on the server
+# Function to rename a file on the server (change)
 def rename_file(old_filename, new_filename):
-    if os.path.exists(old_filename):
-        os.rename(old_filename, new_filename)
-        return True
-    return False
+    try:
+        # Check if the old file exists before attempting to rename
+        if os.path.exists(old_filename):
+            # Check if the new filename is provided
+            if new_filename:
+                os.rename(old_filename, new_filename)
+                print(f"File {old_filename} renamed to {new_filename} successfully.")
+                return True
+            else:
+                print("New filename not provided. Rename failed.")
+                return False
+        else:
+            print(f"File {old_filename} not found. Rename failed.")
+            return False
+    except Exception as e:
+        print(f"Error renaming file: {e}")
+        return False
 
 # Function to handle 'help' command
 def handle_help(connection_socket):
