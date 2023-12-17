@@ -5,7 +5,7 @@ from socket import *
 from ServerUtilities import *
 
 # Connecting to client
-server_ip = '0.0.0.0'  # listen on all interfaces
+server_ip = '127.0.0.1'  # listen on all interfaces
 server_port = 12000  # server port is fixed
 
 server_socket=socket(AF_INET, SOCK_STREAM)
