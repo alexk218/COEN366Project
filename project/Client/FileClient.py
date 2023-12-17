@@ -21,6 +21,11 @@ def is_valid_ip(ip):
 def string_to_binary(input_string):
     return ' '.join(format(ord(char), '08b') for char in input_string)
 
+def binary_to_string(input_binary):
+    binary_values = input_binary.split()
+    ascii_characters = [chr(int(binary, 2)) for binary in binary_values]
+    return ''.join(ascii_characters)
+
 def format_request(command, filename=None, new_filename=None):
     opcode = OPCODES.get(command, "")
 
