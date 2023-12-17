@@ -45,6 +45,7 @@ def format_request(command, filename=None, new_filename=None):
     return request
 
 def send_request(client_socket, request):
+    print(f"Sending to server: {request}")
     client_socket.send(request.encode())
 
 def connect_to_server(ip, port):
@@ -90,6 +91,7 @@ def process_put_command(client_socket, filename):
 
         # Receive the response from the server
         response = receive_response(client_socket)
+        print(f"Response from server: {response}")
 
         # Check if the response code is '000'
         if response[:3] == '000':
@@ -156,7 +158,8 @@ def process_help_command(client_socket):
     try:
         # Send the help request to the server
         code = "10000000"
-        send_request(client_socket, code.encode())
+        binary_code = format(int(code, 2), '08b')  # Convert to binary
+        send_request(client_socket, binary_code)
 
         # Receive the response from the server
         response = receive_response(client_socket)
@@ -165,6 +168,7 @@ def process_help_command(client_socket):
         if response[:3] == '110':
             # Decode the response message
             length = int(response[3:8], 2)
+            print(f"Response: {response}, Type: {type(response)}")
             help_data = binary_to_string(response[8:8 + length])
 
             print(f"Help Data: {help_data}")
@@ -192,66 +196,93 @@ def receive_response(client_socket):
         return response_data
         # If the left-most three bits are not '001', assume a regular response
         # You might want to handle this case differently based on your application
-        return response_code
+    return response_code
 
 def binary_to_string(input_binary):
     binary_values = input_binary.split()
-    ascii_characters = [chr(int(binary, 2)) for binary in binary_values]
+    # Ensure that binary_values is a list of strings
+    ascii_characters = [chr(int(binary.decode(), 2)) for binary in binary_values]
     return ''.join(ascii_characters)
 
+
 def main():
-    try:
-        # Get user input for the server IP and port
-        server_ip = input("Enter the server IP address: ")
-        server_port_input = input("Enter the server port number: ")
+    while True:
+        try:
+            # Get user input for the server IP and port
+            server_ip = input("Enter the server IP address: ")
 
-        # Validate and convert the port number to an integer
-        server_port = int(server_port_input)
+            # Validate server IP
+            if not is_valid_ip(server_ip):
+                raise ValueError("Invalid IP address. Please enter a valid IPv4 address.")
 
-        # Create a TCP socket for the server
-        client_socket = socket(AF_INET, SOCK_STREAM)
+            while True:
+                server_port_input = input("Enter the server port number: ")
 
-        # Attempt to connect to the server
-        client_socket.connect((server_ip, server_port))
+                try:
+                    # Validate and convert the port number to an integer
+                    server_port = int(server_port_input)
 
-        while True:
-            # Get user input for the command and any associated filenames
-            user_input = input("Enter your command: ")
-            command_parts = user_input.split(' ', 2)  # Split input to extract command and filenames
+                    if not (0 < server_port < 65535):
+                        raise ValueError("Invalid port number. Please enter a number between 1 and 65534.")
 
-            # Use format_request to format the user input
-            formatted_request = format_request(*command_parts)
+                    break  # Exit the port input loop if valid
+                except ValueError:
+                    print("Invalid port number. Please enter a valid integer.")
 
-            # Send the formatted request to the server
-            send_request(client_socket, formatted_request)
+            # Create a TCP socket for the server
+            client_socket = socket(AF_INET, SOCK_STREAM)
 
-            # If the command is 'bye', exit the loop
-            if command_parts[0] == 'bye':
-                break
+            # Attempt to connect to the server
+            client_socket.connect((server_ip, server_port))
 
-            # Process different commands
-            if command_parts[0] == 'put':
-                process_put_command(client_socket, command_parts[1])
-            elif command_parts[0] == 'get':
-                process_get_command(command_parts, client_socket)
-            elif command_parts[0] == 'help':
-                process_help_command(client_socket)
-            else:
-                # For other commands, simply receive and print the response
-                response = receive_response(client_socket)
-                print(response)
+            break  # Exit the loop if connection is successful
 
-    except ValueError:
-        print("Invalid input. Please enter valid server IP and port.")
-    except ConnectionRefusedError:
-        print(f"Connection to {server_ip}:{server_port} refused. Please check the server IP and port.")
-    except Exception as e:
-        print(f"Error: {e}")
-    finally:
-        # Close the socket if it was created
-        if 'client_socket' in locals():
-            client_socket.close()
+        except ValueError as ve:
+            print(f"Error: {ve}")
+        except ConnectionRefusedError:
+            print(f"Connection refused. Please check the server IP and port.")
+        except Exception as e:
+            print(f"Error: {e}")
 
-# Run the main function if this script is executed
+    while True:
+        try:
+            while True:
+                # Get user input for the command and any associated filenames
+                user_input = input("Enter your command: ")
+                command_parts = user_input.split(' ', 2)  # Split input to extract command and filenames
+
+                # Use format_request to format the user input
+                formatted_request = format_request(*command_parts)
+
+                # Send the formatted request to the server
+                send_request(client_socket, formatted_request)
+
+                # If the command is 'bye', exit the loop
+                if command_parts[0] == 'bye':
+                    break
+
+                # Process different commands
+                if command_parts[0] == 'put':
+                    process_put_command(client_socket, command_parts[1])
+                elif command_parts[0] == 'get':
+                    process_get_command(command_parts, client_socket)
+                elif command_parts[0] == 'help':
+                    process_help_command(client_socket)
+                else:
+                    # For other commands, simply receive and print the response
+                    response = receive_response(client_socket)
+                    print(response)
+
+        except ValueError as ve:
+            print(f"Error: {ve}")
+        except ConnectionRefusedError:
+            print(f"Connection refused. Please check the server IP and port.")
+        except Exception as e:
+            print(f"Error: {e}")
+        finally:
+            # Close the socket if it was created
+            if 'client_socket' in locals():
+                client_socket.close()
+
 if __name__ == "__main__":
     main()
