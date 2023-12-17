@@ -83,8 +83,7 @@ def handle_help_command(connection_socket):
             help_length = 31
 
         # Form the response message
-        data = format(int(res_code, 2), '03b') + format(help_length, '05b') + ''.join(
-            format(ord(char), '08b') for char in help_message[:help_length])
+        data = f"{res_code}{help_length:05b}{string_to_binary(help_message)}"
         print(data)
         # Send the response
         send_response(connection_socket, data)

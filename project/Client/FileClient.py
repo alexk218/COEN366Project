@@ -255,7 +255,7 @@ def main():
                 formatted_request = format_request(*command_parts)
 
                 # Send the formatted request to the server
-                send_request(client_socket, formatted_request)
+                # send_request(client_socket, formatted_request)
 
                 # If the command is 'bye', exit the loop
                 if command_parts[0] == 'bye':
@@ -269,7 +269,7 @@ def main():
                 elif command_parts[0] == 'help':
                     process_help_command(client_socket)
                 else:
-                    # For other commands, simply receive and print the response
+                    # For other commands, simply receive and print t12he response
                     response = receive_response(client_socket)
                     print(response)
 
