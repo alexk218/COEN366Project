@@ -168,7 +168,7 @@ def process_help_command(client_socket):
         if response[:3] == '110':
             # Decode the response message
             length = int(response[3:8], 2)
-            print(f"Response: {response}, Type: {type(response)}")
+           # print(f"Response: {response}, Type: {type(response)}")
             help_data = binary_to_string(response[8:8 + length])
 
             print(f"Help Data: {help_data}")

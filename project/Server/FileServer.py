@@ -86,7 +86,6 @@ def handle_help_command(connection_socket):
 
         # Form the response message
         data = f"{res_code}{help_length:05b}{string_to_binary(help_message)}"
-        print(data)
         # Send the response
         send_response(connection_socket, data)
 
