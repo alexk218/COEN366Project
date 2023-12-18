@@ -179,7 +179,7 @@ def process_help_command(client_socket):
 
 def receive_response(client_socket):
     # Receive the first byte to check the left-most three bits
-    response_code = client_socket.recv(1).decode()
+    response_code = client_socket.recv(1024).decode()
 
     # Check if the left-most three bits are '000' for correct put or change request
     if response_code[:3] == '000':
@@ -187,13 +187,10 @@ def receive_response(client_socket):
 
     # Check if the left-most three bits are '001' for correct get request
     if response_code[:3] == '001':
-        # Receive and decode the rest of the message
-        response_data = client_socket.recv(1023).decode()
-        return response_data
+        return response_code
     
     elif response_code[:3] == '110':
-        response_data = client_socket.recv(1023).decode()
-        return response_data
+        return response_code
         # If the left-most three bits are not '001', assume a regular response
         # You might want to handle this case differently based on your application
     return response_code
@@ -201,7 +198,7 @@ def receive_response(client_socket):
 def binary_to_string(input_binary):
     binary_values = input_binary.split()
     # Ensure that binary_values is a list of strings
-    ascii_characters = [chr(int(binary.decode(), 2)) for binary in binary_values]
+    ascii_characters = [chr(int(binary, 2)) for binary in binary_values]
     return ''.join(ascii_characters)
 
 
@@ -255,7 +252,7 @@ def main():
                 formatted_request = format_request(*command_parts)
 
                 # Send the formatted request to the server
-                # send_request(client_socket, formatted_request)
+                send_request(client_socket, formatted_request)
 
                 # If the command is 'bye', exit the loop
                 if command_parts[0] == 'bye':

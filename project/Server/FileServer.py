@@ -2,7 +2,7 @@ import os
 from socket import *
 
 def parse_request(request):
-    opcode, *rest = request.split(' ', 1)
+    opcode, rest = request[:3], request[9:]
 
     command = {
         "000": "put",
@@ -13,6 +13,7 @@ def parse_request(request):
         "111": "bye"
     }.get(opcode, "Invalid")
 
+    # Decode the rest of the request to retrieve filenames
     filenames = [binary_to_string(fname) for fname in rest[0].split(' ')] if rest else None
 
     return command, filenames
@@ -39,6 +40,7 @@ def handle_request(parsed_request, connection_socket):
         send_response(connection_socket, "10000000")
 
     return True
+
 
 def handle_put_command(filenames, connection_socket):
     if filenames:
@@ -162,7 +164,7 @@ def close_connection(connection_socket):
 
 if __name__ == "__main__":
     # Connecting to client
-    server_ip = '127.0.0.1'  # listen on all interfaces
+    server_ip = '127.0.0.1'  # server port is fixed
     server_port = 12000  # server port is fixed
 
     server_socket=socket(AF_INET, SOCK_STREAM)
