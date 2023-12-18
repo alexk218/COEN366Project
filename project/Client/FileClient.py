@@ -1,3 +1,13 @@
+#
+# Name: Cristofer Elhage		ID: 40107168
+# Name: Alexander Kepekci	    ID: 40113003
+#
+# FileClient.py is used as the client. Here, we connect to a server and interact with it by using different supported commands.
+# The client will parse the response message, and do what is necessary.
+#
+# We are the sole authors of this code.
+#
+
 import os
 import ipaddress
 from socket import *

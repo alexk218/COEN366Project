@@ -1,3 +1,13 @@
+#
+# Name: Cristofer Elhage		ID: 40107168
+# Name: Alexander Kepekci	    ID: 40113003
+#
+# FileServer.py is used as the server. Here, we wait for a client's connection and their request messages.
+# The server will parse the request message, compute what is necessary, and then send back a response message to the client.
+#
+# We are the sole authors of this code.
+#
+
 import os
 from socket import *
 
@@ -163,7 +173,7 @@ def close_connection(connection_socket):
 
 if __name__ == "__main__":
     # Connecting to client
-    server_ip = '127.0.0.1'  # server port is fixed
+    server_ip = '127.0.0.1'  # server ip is fixed
     server_port = 12000  # server port is fixed
 
     server_socket=socket(AF_INET, SOCK_STREAM)
